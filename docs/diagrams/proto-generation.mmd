@@ -1,0 +1,5 @@
+flowchart TB
+    PROTO[proto/product.proto\nFuente de verdad] --> PY[Python stubs\nproduct_pb2.py\nproduct_pb2_grpc.py]
+    PROTO --> JS[Browser bindings\nproduct_pb.js\nproduct_grpc_web_pb.js]
+    PY --> SERVER[Servidor gRPC Python]
+    JS --> FRONT[Frontend React]

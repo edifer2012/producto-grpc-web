@@ -1,0 +1,9 @@
+flowchart LR
+    B[Browser] --> C[ProductServiceClient]
+    C --> E[Envoy grpc_web filter]
+    E --> S[ProductServicer]
+    S --> A[ProductService]
+    A --> P[ProductRepositoryPort]
+    P --> R[SQLAlchemyProductRepository]
+    R --> O[SQLAlchemy ORM]
+    O --> DB[(PostgreSQL)]

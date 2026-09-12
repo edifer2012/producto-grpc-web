@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-producto}
+      POSTGRES_USER: ${POSTGRES_USER:-producto}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-producto}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-producto} -d ${POSTGRES_DB:-producto}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [producto-net]
+
+  grpc-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "50051:50051"
+    networks: [producto-net]
+
+  envoy:
+    image: envoyproxy/envoy:v1.35-latest
+    command: ["/usr/local/bin/envoy", "-c", "/etc/envoy/envoy.yaml", "--log-level", "info"]
+    volumes:
+      - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+    depends_on:
+      grpc-server:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+      - "9901:9901"
+    networks: [producto-net]
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    depends_on:
+      - envoy
+    ports:
+      - "8088:80"
+    networks: [producto-net]
+
+volumes:
+  postgres_data:
+
+networks:
+  producto-net:
+    driver: bridge

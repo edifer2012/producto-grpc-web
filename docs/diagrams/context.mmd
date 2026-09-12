@@ -1,0 +1,5 @@
+flowchart LR
+    U[Usuario] -->|HTTP :8088| W[Aplicación Web React]
+    W -->|gRPC-Web :8080| E[Envoy Proxy]
+    E -->|gRPC HTTP/2 :50051| G[producto-grpc]
+    G -->|SQL| D[(PostgreSQL)]

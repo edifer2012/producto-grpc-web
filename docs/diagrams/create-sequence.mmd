@@ -1,0 +1,20 @@
+sequenceDiagram
+    actor U as Usuario
+    participant R as React
+    participant E as Envoy
+    participant G as ProductServicer
+    participant S as ProductService
+    participant P as Repository
+    participant D as PostgreSQL
+    U->>R: Guardar producto
+    R->>E: CreateProductRequest (gRPC-Web)
+    E->>G: CreateProductRequest (gRPC/HTTP2)
+    G->>S: create(ProductCreate)
+    S->>P: create(data)
+    P->>D: INSERT products
+    D-->>P: Product
+    P-->>S: Product
+    S-->>G: Product
+    G-->>E: ProductResponse
+    E-->>R: ProductResponse (gRPC-Web)
+    R-->>U: Confirmación + catálogo actualizado
